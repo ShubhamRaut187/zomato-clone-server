@@ -1,6 +1,6 @@
 # 🍴 Zomato Clone Backend
 
-## Welcome to the backend repository for the Zomato Clone! This project is built using the MERN stack (MongoDB, Express.js, React, Node.js) to simulate the functionality of the Zomato platform. It serves as the backbone for managing data, authentication, and APIs for the application.
+**Welcome to the backend repository for the Zomato Clone! This project is built using the MERN stack (MongoDB, Express.js, React, Node.js) to simulate the functionality of the Zomato platform. It serves as the backbone for managing data, authentication, and APIs for the application.**
 
 # 🚀 Features
 **User Authentication:** Signup, login, and session management using JWT.
