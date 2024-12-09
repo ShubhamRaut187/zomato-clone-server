@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const bcrypt = require('bcrypt');
+const { userModel } = require('../../../DataSchema/Users');
 
 const userRouter = Router();
 
@@ -46,6 +47,7 @@ userRouter.post('/api/v1/signup', async (req, res)=>{
 
 });
 
+//Todo: Only super-admin-system and general-admin-system can view all users and they should be authenticated.
 userRouter.get('/api/v1/users',async(req,res) => {
     // Todo: Add filtering options in API using query params.
     try {
@@ -71,6 +73,7 @@ userRouter.get('/api/v1/users',async(req,res) => {
     }
 });
 
+//Todo: This route should only be accessible by authorized user. The user cannot view another user's details. (Use middleware)
 userRouter.get('api/v1/users/:userId', async(req,res) => {
     try {
 
@@ -108,5 +111,53 @@ userRouter.get('api/v1/users/:userId', async(req,res) => {
             cause: error,
         });
 
+    }
+});
+
+// Todo: Add logic or middleware which will prevent a user to modify details of another user. This route should only be accessible to authorized user.
+userRouter.patch('/api/v1/user/update/:userId', async(req,res) => {
+    try {
+
+        const newUserDetails = req.body;
+        const userId = req.params.userId;
+        if (!newUserDetails || Object.keys(newUserDetails).length === 0) {
+            res.status(204).json({
+                error: false,
+                message: 'Request has no data to update user.',
+            });
+            return;
+        } 
+
+        if (newUserDetails.password && typeof newUserDetails.password === 'string') {
+            const unsecuredPassword = newUserDetails;
+            const securedPassword = bcrypt.hash(unsecuredPassword, 8);
+            const newDetails = {
+                ...newUserDetails,
+                password: securedPassword,
+            }
+            const updatedUser = await userModel.findOneAndUpdate({ _id: userId}, newDetails, { new: true });
+            res.status(202).json({
+                error: false,
+                message: 'User updated successfully.',
+                user: updatedUser,
+            });
+            return;
+        } else {
+            const updatedUser = await userModel.findOneAndUpdate({ _id: userId}, newUserDetails, { new: true });
+            res.status(202).json({   
+                error: false,
+                message: 'User updated successfully.',
+                user: updatedUser,
+            });
+        }
+
+    } catch (error) {
+
+        res.status(501).json({
+            error: true,
+            message: 'Internal server error.',
+            cause: error,
+        });
+        
     }
 })
