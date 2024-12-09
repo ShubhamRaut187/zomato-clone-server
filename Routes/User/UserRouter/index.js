@@ -1,5 +1,7 @@
 const { Router } = require('express');
 const bcrypt = require('bcrypt');
+
+const { isUserAuthenticated } = require('../../../Middlewares/Authentication/User')
 const { userModel } = require('../../../DataSchema/Users');
 
 const userRouter = Router();
@@ -48,7 +50,7 @@ userRouter.post('/api/v1/signup', async (req, res)=>{
 });
 
 //Todo: Only super-admin-system and general-admin-system can view all users and they should be authenticated.
-userRouter.get('/api/v1/users',async(req,res) => {
+userRouter.get('/api/v1/users', isUserAuthenticated, async(req,res) => {
     // Todo: Add filtering options in API using query params.
     try {
         
@@ -74,7 +76,7 @@ userRouter.get('/api/v1/users',async(req,res) => {
 });
 
 //Todo: This route should only be accessible by authorized user. The user cannot view another user's details. (Use middleware)
-userRouter.get('api/v1/users/:userId', async(req,res) => {
+userRouter.get('api/v1/users/:userId', isUserAuthenticated, async(req,res) => {
     try {
 
         const userId = req.params.userId;
@@ -115,7 +117,7 @@ userRouter.get('api/v1/users/:userId', async(req,res) => {
 });
 
 // Todo: Add logic or middleware which will prevent a user to modify details of another user. This route should only be accessible to authorized user.
-userRouter.patch('/api/v1/user/update/:userId', async(req,res) => {
+userRouter.patch('/api/v1/user/update/:userId', isUserAuthenticated, async(req,res) => {
     try {
 
         const newUserDetails = req.body;
@@ -158,6 +160,6 @@ userRouter.patch('/api/v1/user/update/:userId', async(req,res) => {
             message: 'Internal server error.',
             cause: error,
         });
-        
+
     }
 })
