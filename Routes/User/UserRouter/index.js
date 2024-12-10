@@ -84,7 +84,7 @@ userRouter.get('api/v1/users/:userId', isUserAuthenticated, async(req,res) => {
         if (!userId || typeof userId !== 'string') {
             res.status(204).json({
                 error: false,
-                message:'Request does notinclude userId.',
+                message:'Request does not include userId.',
             });
             return;
         }
