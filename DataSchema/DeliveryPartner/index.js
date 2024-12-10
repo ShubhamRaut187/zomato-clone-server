@@ -45,6 +45,14 @@ const deliveryPartnerSchema = mongoose.Schema({
         type: String,
         required: true,
     },
+    role: {
+        type: String,
+        default: 'delivery-partner'
+    },
+    availability: {
+        type: Object,
+        required: true,
+    }
 }); 
 
 const deliveryPartnerModel = mongoose.model('deliveryPartners', deliveryPartnerSchema);

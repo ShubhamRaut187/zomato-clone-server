@@ -27,6 +27,10 @@ const userSchema = mongoose.Schema({
     },
     paymentOption: {
         type: Object,
+    },
+    role: {
+        type: String,
+        default: 'general-user'
     }
 });
 
