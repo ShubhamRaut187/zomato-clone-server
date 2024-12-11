@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 
 const { isUserAuthenticated } = require('../../../Middlewares/Authentication/User')
 const { userModel } = require('../../../DataSchema/Users');
+const { isUserAuthorized } = require('../../../Middlewares/Authorization')
 
 const userRouter = Router();
 
@@ -76,7 +77,7 @@ userRouter.get('/api/v1/users', isUserAuthenticated, async(req,res) => {
 });
 
 //Todo: This route should only be accessible by authorized user. The user cannot view another user's details. (Use middleware)
-userRouter.get('api/v1/users/:userId', isUserAuthenticated, async(req,res) => {
+userRouter.get('api/v1/users/:userId', isUserAuthenticated, isUserAuthorized, async(req,res) => {
     try {
 
         const userId = req.params.userId;
@@ -117,7 +118,7 @@ userRouter.get('api/v1/users/:userId', isUserAuthenticated, async(req,res) => {
 });
 
 // Todo: Add logic or middleware which will prevent a user to modify details of another user. This route should only be accessible to authorized user.
-userRouter.patch('/api/v1/user/update/:userId', isUserAuthenticated, async(req,res) => {
+userRouter.patch('/api/v1/user/update/:userId', isUserAuthenticated, isUserAuthorized,  async(req,res) => {
     try {
 
         const newUserDetails = req.body;
@@ -166,7 +167,7 @@ userRouter.patch('/api/v1/user/update/:userId', isUserAuthenticated, async(req,r
 
 // Todo: Prevent a user to delete any another user. Logout user when he/she deletes his account himself. Admin can also delete user.
 // Todo: Add a Route to pause and resume the user account. 
-userRouter.delete('/api/v1/delete/:userId', isUserAuthenticated, async(req,res) => {
+userRouter.delete('/api/v1/delete/:userId', isUserAuthenticated, isUserAuthorized,  async(req,res) => {
     try {
 
         const userId = req.params.userId;
