@@ -162,4 +162,40 @@ userRouter.patch('/api/v1/user/update/:userId', isUserAuthenticated, async(req,r
         });
 
     }
-})
+});
+
+// Todo: Prevent a user to delete any another user. Logout user when he/she deletes his account himself. Admin can also delete user.
+// Todo: Add a Route to pause and resume the user account. 
+userRouter.delete('/api/v1/delete/:userId', isUserAuthenticated, async(req,res) => {
+    try {
+
+        const userId = req.params.userId;
+        if (!userId || typeof userId !== 'string') {
+            res.status(204).json({
+                error: false,
+                message: 'Request does not have userId',
+            });
+            return;
+        }
+
+        const deletedUser = userModel.findOneAndDelete({ _id: userId}, { new: true });
+        res.status(200).json({
+            error: false,
+            message: 'User deleted successfully.',
+            user: deletedUser,
+        });
+
+    } catch (error) {
+        
+        res.status(501).json({
+            error: true,
+            message: 'Internal server error.',
+            cause: error,
+        });
+
+    }
+});
+
+module.exports = {
+    userRouter,
+}
