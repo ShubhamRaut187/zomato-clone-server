@@ -18,5 +18,5 @@
 **JWT:** Authentication using JSON Web Tokens.<br/>
 **Bcrypt.js:** For secure password hashing.<br/>
 
-## Will be live soon...
+## Will be live soon......
 
