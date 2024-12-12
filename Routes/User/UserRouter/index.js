@@ -200,16 +200,18 @@ userRouter.delete('/api/v1/delete/:userId', isUserAuthenticated, isUserAuthorize
 // Todo: Decide the status format for the user. Should be an object with reason for blocking the user.
 // Status: true ---- User is unblocked and active.
 // Status: false ---- User is blocked and not-active.
-userRouter.patch('api/v1/block/:userId', isUserAuthorized, isPlatformAdmin, async(req, res) => {
+userRouter.patch('api/v1/block/:userId', isUserAuthenticated, isPlatformAdmin, async(req, res) => {
     try {
 
         const { userId } = req.params.userId;
         if (!userId || typeof userId !== 'string') {
+            
             res.status(204).json({
                 error: false,
                 message: 'Request does not have userId.'
             });
             return;
+            
         }
 
        const user = await findOneAndUpdate({ _id: userId}, { status: false }, { new: true });
