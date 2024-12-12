@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 
 const { isUserAuthenticated } = require('../../../Middlewares/Authentication/User')
 const { userModel } = require('../../../DataSchema/Users');
-const { isUserAuthorized } = require('../../../Middlewares/Authorization')
+const { isUserAuthorized, isPlatformAdmin } = require('../../../Middlewares/Authorization')
 
 const userRouter = Router();
 
@@ -192,6 +192,47 @@ userRouter.delete('/api/v1/delete/:userId', isUserAuthenticated, isUserAuthorize
             error: true,
             message: 'Internal server error.',
             cause: error,
+        });
+
+    }
+});
+
+// Todo: Decide the status format for the user. Should be an object with reason for blocking the user.
+userRouter.patch('api/v1/block/:userId', isUserAuthorized, isPlatformAdmin, async(req, res) => {
+    try {
+
+        const { userId } = req.params.userId;
+        if (!userId || typeof userId !== 'string') {
+            res.status(204).json({
+                error: false,
+                message: 'Request does not have userId.'
+            });
+            return;
+        }
+
+       const user = await findOneAndUpdate({ _id: userId}, { status: false }, { new: true });
+       if (user) {
+
+            res.status(200).json({
+                error: false,
+                message: 'User blocked successfully.',
+            });
+            
+       } else {
+
+            res.status(404).json({
+                error: false,
+                message: 'User not found.'
+            });
+
+       };
+
+    } catch (error) {
+
+        console.log('Error whille blocking user: ', error);
+        res.status(501).json({
+            error: true,
+            message: 'Internal server error.'
         });
 
     }
