@@ -32,9 +32,8 @@ const userSchema = mongoose.Schema({
         type: String,
         default: 'general-user'
     },
-    status: {
-        type: [],
-        default: [],
+    restrictionData: {
+        type: Object,
     },
 });
 
