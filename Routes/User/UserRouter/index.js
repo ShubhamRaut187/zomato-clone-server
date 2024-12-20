@@ -200,10 +200,13 @@ userRouter.delete('/api/v1/delete/:userId', isUserAuthenticated, isUserAuthorize
 // Todo: Decide the status format for the user. Should be an object with reason for blocking the user.
 // Status: true ---- User is unblocked and active.
 // Status: false ---- User is blocked and not-active.
+//  Expected BLocking Data = { reason: '', criticle: 'minor'} from fe.
 userRouter.patch('api/v1/block/:userId', isUserAuthenticated, isPlatformAdmin, async(req, res) => {
     try {
 
         const { userId } = req.params.userId;
+        const { blockingData } = req.body;
+
         if (!userId || typeof userId !== 'string') {
             
             res.status(204).json({
@@ -214,23 +217,52 @@ userRouter.patch('api/v1/block/:userId', isUserAuthenticated, isPlatformAdmin, a
             
         }
 
-       const user = await findOneAndUpdate({ _id: userId}, { status: false }, { new: true });
-       if (user) {
-
-            res.status(200).json({
-                error: false,
-                message: 'User blocked successfully.',
-            });
+        if ( blockingData && Object.keys(blockingData).length !== 0) {
             
-       } else {
+            const user = await userModel.findOne({ _id: userId });
+            
+            if (user) {
 
-            res.status(404).json({
-                error: false,
-                message: 'User not found.'
-            });
+                const status = user.status;
 
-       };
+                if( status.status === true) {
 
+                    res.status(409).json({
+                        error: false,
+                        message: 'User is already blocked.',
+                    });
+                    return;
+
+                }
+
+                const currentDate = new Date();
+                const dateFormatted = currentDate.toISOString(); 
+
+                const newData = {
+                    ...blockingData,
+                    timeStamp: dateFormatted,
+                }
+
+                status.status = true
+                status.blockReasons.push(blockingData);
+
+                const updatedUser = findOneAndUpdate({ _id: userId }, status, { new: true });
+                
+                res.status(200).json({
+                    error: false,
+                    message: 'User blocked successfully.'
+                 });
+                
+            } else {
+
+                res.status(404).json({
+                    error: false,
+                    message: 'User not found.'
+                });
+
+            }
+        }
+       
     } catch (error) {
 
         console.log('Error whille blocking user: ', error);
@@ -246,31 +278,52 @@ userRouter.patch('api/v1/unblock/:userId', isUserAuthenticated, isPlatformAdmin,
     try {
         
         const { userId } = req.params.userId;
-        if (!userId || typeof userId !== 'string') {
+
+        if (!userId || typeof userId !== 'string' || !unblockingData || Object.keys(unblockingData).length === 0) {
 
             res.status(204).json({
                 error: false,
-                message: 'Request does not have userId.'
+                message: 'Request has missing information.'
             });
             return;
+
         }
 
-        const user = await findOneAndUpdate({ _id: userId}, { status: true }, { new: true });
+        const user = await userModel.findOne({ _id: userId });
+
         if (user) {
+
+            const status = user;
+
+            if (status.status === false) {
+                
+                res.status(409).json({
+                    error: false,
+                    message: 'User is already unblocked';
+                });
+                return;
+
+            } 
+
+            status.status = false;
+
+            const updatedUser = await findOneAndUpdate({ _id: userId }, status, { new: true });
 
             res.status(200).json({
                 error: false,
-                message: 'User unblocked successfully.',
+                message: 'User unblocked successfully';
             });
-            
-       } else {
 
+        } else {
+            
             res.status(404).json({
                 error: false,
-                message: 'User not found.'
+                message: 'User not found.',
             });
 
-       };
+        }
+        
+
     } catch (error) {
         
         console.log('Error whille blocking user: ', error);
