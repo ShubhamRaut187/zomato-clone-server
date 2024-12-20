@@ -223,9 +223,9 @@ userRouter.patch('api/v1/block/:userId', isUserAuthenticated, isPlatformAdmin, a
             
             if (user) {
 
-                const status = user.status;
+                const { restrictionData } = user.restrictionData;
 
-                if( status.status === true) {
+                if( restrictionData.status === true) {
 
                     res.status(409).json({
                         error: false,
@@ -243,10 +243,10 @@ userRouter.patch('api/v1/block/:userId', isUserAuthenticated, isPlatformAdmin, a
                     timeStamp: dateFormatted,
                 }
 
-                status.status = true
-                status.blockReasons.push(blockingData);
+                restrictionData.status = true
+                restrictionData.blockReasons.push(blockingData);
 
-                const updatedUser = findOneAndUpdate({ _id: userId }, status, { new: true });
+                const updatedUser = findOneAndUpdate({ _id: userId }, restrictionData, { new: true });
                 
                 res.status(200).json({
                     error: false,
@@ -293,25 +293,25 @@ userRouter.patch('api/v1/unblock/:userId', isUserAuthenticated, isPlatformAdmin,
 
         if (user) {
 
-            const status = user;
+            const { restrictionData } = user;
 
-            if (status.status === false) {
+            if (restrictionData.status === false) {
                 
                 res.status(409).json({
                     error: false,
-                    message: 'User is already unblocked';
+                    message: 'User is already unblocked',
                 });
                 return;
 
             } 
 
-            status.status = false;
+            restrictionData.status = false;
 
-            const updatedUser = await findOneAndUpdate({ _id: userId }, status, { new: true });
+            const updatedUser = await findOneAndUpdate({ _id: userId }, restrictionData, { new: true });
 
             res.status(200).json({
                 error: false,
-                message: 'User unblocked successfully';
+                message: 'User unblocked successfully',
             });
 
         } else {
